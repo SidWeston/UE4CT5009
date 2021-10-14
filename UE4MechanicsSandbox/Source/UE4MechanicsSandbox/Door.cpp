@@ -3,6 +3,8 @@
 
 #include "Door.h"
 
+#include "GameFramework/Character.h"
+
 // Sets default values
 ADoor::ADoor()
 {
@@ -15,13 +17,23 @@ ADoor::ADoor()
 	boxTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Door Trigger"));
 	boxTrigger->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 
+	boxTrigger->OnComponentBeginOverlap.AddDynamic(this, &ADoor::OnBoxBeginOverlap);
+	boxTrigger->OnComponentEndOverlap.AddDynamic(this, &ADoor::OnBoxEndOverlap);
+
 }
 
 // Called when the game starts or when spawned
 void ADoor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	closedRotation = GetActorRotation(); //sets the closed rotation to the current rotation of the door when the game starts, assumes that the door starts closed
+
+	openRotation = GetActorRotation(); //sets the open rotation to be 90 degrees further on the z axis
+	openRotation.Yaw += 90;
+
+	targetRotation = closedRotation; //sets the target rotation to initially be the closed rotation
+
 }
 
 // Called every frame
@@ -29,13 +41,26 @@ void ADoor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if(boxTrigger->OverlapComponent(boxTrigger->GetComponentLocation(), boxTrigger->GetComponentQuat(), boxTrigger->GetCollisionShape()))
+	if(shouldOpen)
 	{
-		doorMesh->SetRelativeRotation(targetRotation);
+		doorMesh->SetRelativeRotation(FMath::Lerp(closedRotation, targetRotation, 0.05f));
 	}
 
 }
 
+void ADoor::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult )
+{
+	const ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	if (playerCharacter->GetUniqueID() == OtherActor->GetUniqueID())
+	{
+		targetRotation = openRotation;
+		shouldOpen = true;
+	}
+}
 
+void ADoor::OnBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	
+}
 
 
