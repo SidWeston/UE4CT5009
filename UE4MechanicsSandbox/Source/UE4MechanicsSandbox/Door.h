@@ -33,7 +33,7 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	FRotator closedRotation;
 
-	float openDoorTimer = 0.0f;
+	float openDoorTimer;
 
 	bool shouldOpen = false;
 
@@ -49,6 +49,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere);
 	UStaticMeshComponent* doorMesh;
+
+	UPROPERTY(VisibleAnywhere);
+	UStaticMeshComponent* doorFrame;
 
 	UPROPERTY(VisibleAnywhere);
 	UBoxComponent* boxTrigger;
