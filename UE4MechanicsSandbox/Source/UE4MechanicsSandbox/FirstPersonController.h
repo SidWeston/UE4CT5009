@@ -17,27 +17,37 @@ public:
 	AFirstPersonController();
 
 	//Input functions
+	//Mouse/Camera input
 	void LookUp(float axisValue);
 	void LookRight(float axisValue);
+	//WASD/Movement Input
 	void WalkForward(float axisValue);
 	void WalkRight(float axisValue);
+	//Action Inputs
 	void PlayerJump();
 	void CrouchBegin();
 	void CrouchEnd();
 	void SprintStart();
 	void SprintEnd();
+	void UseAbilityOne();
+	void UseAbilityTwo();
 
 	//create a camera 
 	UPROPERTY(EditAnywhere);
 	UCameraComponent* playerCamera;
 
+	UPROPERTY(EditAnywhere);
+	float sprintSpeed;
+
+	UPROPERTY(EditAnywhere);
+	float walkSpeed;
+
+	UPROPERTY(EditAnywhere);
+	bool canDoubleJump;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-private:
-
-	float moveSpeedMultiplier;
 
 public:	
 	// Called every frame
