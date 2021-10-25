@@ -1,0 +1,228 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "DualViewCharacterController.h"
+
+#include "GameFramework/CharacterMovementComponent.h"
+
+// Sets default values
+ADualViewCharacterController::ADualViewCharacterController()
+{
+ 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+
+	currentCameraMode = FirstPerson;
+
+	firstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("First Person Camera"));
+	firstPersonCamera->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	firstPersonCamera->bUsePawnControlRotation = true;
+
+	boomArmTP = CreateDefaultSubobject <USpringArmComponent>(TEXT("Boom Arm"));
+	boomArmTP->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	boomArmTP->TargetArmLength = 300.0f;
+	boomArmTP->bUsePawnControlRotation = true;
+	thirdPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Third Person Camera"));
+	thirdPersonCamera->AttachToComponent(boomArmTP, FAttachmentTransformRules::KeepRelativeTransform);
+	thirdPersonCamera->bUsePawnControlRotation = true;
+	thirdPersonCamera->SetActive(false);
+
+	GetCharacterMovement()->RotationRate = FRotator(0, 540, 0);
+	turnRate = 45;
+
+	walkSpeed = 400;
+	sprintSpeed = 1000;
+	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
+
+}
+
+// Called when the game starts or when spawned
+void ADualViewCharacterController::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+// Called every frame
+void ADualViewCharacterController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+// Called to bind functionality to input
+void ADualViewCharacterController::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	//Bind input events to call functions
+	//Axis mappings are buttons which are held and can have a value between -1 and 1
+	//Mouse Input
+	PlayerInputComponent->BindAxis(TEXT("LookRight"), this, &ADualViewCharacterController::LookRight);
+	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ADualViewCharacterController::LookUp);
+	//WASD Input
+	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ADualViewCharacterController::WalkForward);
+	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ADualViewCharacterController::WalkRight);
+
+	//action mappings are either on or off and have a value of either 0 or 1
+	//Jump
+	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ADualViewCharacterController::PlayerJump);
+	//Sprint
+	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Pressed, this, &ADualViewCharacterController::SprintStart);
+	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Released, this, &ADualViewCharacterController::SprintEnd);
+	//Player Abilities
+	PlayerInputComponent->BindAction(TEXT("AbilityOne"), IE_Pressed, this, &ADualViewCharacterController::UseAbilityOne);
+	PlayerInputComponent->BindAction(TEXT("AbilityTwo"), IE_Pressed, this, &ADualViewCharacterController::UseAbilityTwo);
+	//Change the player camera
+	PlayerInputComponent->BindAction(TEXT("CameraChange"), IE_Pressed, this, &ADualViewCharacterController::ChangeCamera);
+}
+
+void ADualViewCharacterController::LookUp(float axisValue)
+{
+	switch (currentCameraMode)
+	{
+	case FirstPerson:
+	{
+		this->AddControllerPitchInput(axisValue);
+		break;
+	}
+	case ThirdPerson:
+	{
+		this->AddControllerPitchInput(axisValue * GetWorld()->GetDeltaSeconds() * turnRate);
+		break;
+	}
+	default:
+	{
+		break;
+	}
+	}
+
+}
+
+void ADualViewCharacterController::LookRight(float axisValue)
+{
+	switch (currentCameraMode)
+	{
+	case FirstPerson:
+	{
+		this->AddControllerYawInput(axisValue);
+		break;
+	}
+	case ThirdPerson:
+	{
+		this->AddControllerYawInput(axisValue * GetWorld()->GetDeltaSeconds() * turnRate);
+		break;
+	}
+	default:
+	{
+		break;
+	}
+	}
+
+}
+
+void ADualViewCharacterController::WalkForward(float axisValue)
+{
+	switch (currentCameraMode)
+	{
+	case FirstPerson:
+	{
+		this->AddMovementInput(this->GetActorForwardVector() * axisValue);
+		break;
+	}
+	case ThirdPerson:
+	{
+		if (Controller != NULL && axisValue != 0)
+		{
+			const FRotator rotation = Controller->GetControlRotation();
+			const FRotator yaw(0, rotation.Yaw, 0);
+			const FVector direction = FRotationMatrix(yaw).GetUnitAxis(EAxis::X);
+
+			AddMovementInput(direction, axisValue);
+		}
+
+		break;
+	}
+	default:
+	{
+		break;
+	}
+	}
+}
+void ADualViewCharacterController::WalkRight(float axisValue)
+{
+	switch (currentCameraMode)
+	{
+	case FirstPerson:
+	{
+		this->AddMovementInput(this->GetActorRightVector() * axisValue);
+		break;
+	}
+	case ThirdPerson:
+	{
+		if (Controller != NULL && axisValue != 0)
+		{
+			const FRotator rotation = Controller->GetControlRotation();
+			const FRotator yaw(0, rotation.Yaw, 0);
+			const FVector direction = FRotationMatrix(yaw).GetUnitAxis(EAxis::Y);
+
+			AddMovementInput(direction, axisValue);
+		}
+		break;
+	}
+	default:
+	{
+		break;
+	}
+	}
+
+}
+void ADualViewCharacterController::PlayerJump()
+{
+	this->Jump();
+}
+void ADualViewCharacterController::SprintStart()
+{
+	GetCharacterMovement()->MaxWalkSpeed = sprintSpeed;
+}
+void ADualViewCharacterController::SprintEnd()
+{
+	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
+}
+void ADualViewCharacterController::UseAbilityOne()
+{
+	if(JumpMaxCount == 1)
+	{
+		JumpMaxCount = 2;
+	}
+	else
+	{
+		JumpMaxCount = 1;
+	}
+}
+void ADualViewCharacterController::UseAbilityTwo()
+{
+	
+}
+
+void ADualViewCharacterController::ChangeCamera()
+{
+	if(currentCameraMode == FirstPerson)
+	{
+		firstPersonCamera->SetActive(false);
+		thirdPersonCamera->SetActive(true);
+		bUseControllerRotationPitch = false;
+		bUseControllerRotationRoll = false;
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+		currentCameraMode = ThirdPerson;
+	}
+	else if(currentCameraMode == ThirdPerson)
+	{
+		thirdPersonCamera->SetActive(false);
+		firstPersonCamera->SetActive(true);
+		bUseControllerRotationYaw = true;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		currentCameraMode = FirstPerson;
+	}
+}
+

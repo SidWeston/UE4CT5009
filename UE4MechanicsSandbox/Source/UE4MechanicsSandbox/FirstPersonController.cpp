@@ -15,7 +15,7 @@ AFirstPersonController::AFirstPersonController()
 	playerCamera->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 	this->GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	this->GetCharacterMovement()->MaxWalkSpeed = 400;
-
+	playerCamera->bUsePawnControlRotation = true;
 	//set default values for movement component when the first person controller is generated
 	walkSpeed = 400;
 
@@ -27,9 +27,6 @@ AFirstPersonController::AFirstPersonController()
 void AFirstPersonController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	playerCamera->bUsePawnControlRotation = true;
-
 }
 
 // Called every frame
