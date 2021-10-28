@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
-#include "Math/UnrealMathVectorCommon.h"
+#include "Components/TimelineComponent.h"
 #include "Components/BoxComponent.h"
 #include "Door.generated.h"
 
@@ -24,22 +24,29 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	FRotator targetRotation;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	FRotator openRotation;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	FRotator closedRotation;
 
-	float openDoorTimer;
-
-	bool shouldOpen = false;
+	UPROPERTY(VisibleAnywhere)
+	UTimelineComponent* doorTimeline;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* doorCurve;
+
+	FOnTimelineFloat UpdateTimelineFloat;
+
+	UFUNCTION()
+	void UpdateTimelineComp(float output);
 
 	//door begin and end overlap function definitions
 	UFUNCTION()

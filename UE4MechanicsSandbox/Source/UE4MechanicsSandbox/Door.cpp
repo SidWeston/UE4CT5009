@@ -23,6 +23,8 @@ ADoor::ADoor()
 	boxTrigger->OnComponentBeginOverlap.AddDynamic(this, &ADoor::OnBoxBeginOverlap);
 	boxTrigger->OnComponentEndOverlap.AddDynamic(this, &ADoor::OnBoxEndOverlap);
 
+	doorTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("Door Timeline"));
+
 }
 
 // Called when the game starts or when spawned
@@ -37,7 +39,12 @@ void ADoor::BeginPlay()
 
 	targetRotation = closedRotation; //sets the target rotation to initially be the closed rotation
 
-	openDoorTimer = 0.0f;
+	UpdateTimelineFloat.BindDynamic(this, &ADoor::UpdateTimelineComp);
+
+	if(doorCurve)
+	{
+		doorTimeline->AddInterpFloat(doorCurve, UpdateTimelineFloat);
+	}
 
 }
 
@@ -45,36 +52,16 @@ void ADoor::BeginPlay()
 void ADoor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (openDoorTimer < 1 && shouldOpen)
-	{
-		openDoorTimer += DeltaTime;
-	}
-	else if (openDoorTimer > 1 && shouldOpen)
-	{
-		openDoorTimer = 1;
-	}
-	if (!shouldOpen && openDoorTimer > 0)
-	{
-		openDoorTimer -= DeltaTime;
-	}
-	else if (!shouldOpen && openDoorTimer < 0)
-	{
-		openDoorTimer = 0;
-	}
-		
-	doorMesh->SetRelativeRotation(FMath::Lerp(closedRotation, targetRotation, openDoorTimer));
-	
-
 }
 
 void ADoor::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult )
 {
+	UE_LOG(LogTemp, Warning, TEXT("Overlapped!"));
 	const ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	if (playerCharacter->GetUniqueID() == OtherActor->GetUniqueID())
 	{
 		targetRotation = openRotation;
-		shouldOpen = true;
+		doorTimeline->Play();
 	}
 }
 
@@ -83,8 +70,14 @@ void ADoor::OnBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 	const ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	if (playerCharacter->GetUniqueID() == OtherActor->GetUniqueID())
 	{
-		shouldOpen = false;
+		doorTimeline->Reverse();
 	}
 }
+
+void ADoor::UpdateTimelineComp(float output)
+{
+	doorMesh->SetRelativeRotation(FMath::Lerp(closedRotation, targetRotation, output));
+}
+
 
 

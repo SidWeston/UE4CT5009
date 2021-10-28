@@ -11,12 +11,16 @@ ADualViewCharacterController::ADualViewCharacterController()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	//set initial camera mode
 	currentCameraMode = FirstPerson;
 
+	//setup first person camera
 	firstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("First Person Camera"));
 	firstPersonCamera->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	firstPersonCamera->bUsePawnControlRotation = true;
 
+	//setup third person camera
+	//third person camera rotates around a spring arm component
 	boomArmTP = CreateDefaultSubobject <USpringArmComponent>(TEXT("Boom Arm"));
 	boomArmTP->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	boomArmTP->TargetArmLength = 300.0f;
@@ -26,6 +30,7 @@ ADualViewCharacterController::ADualViewCharacterController()
 	thirdPersonCamera->bUsePawnControlRotation = true;
 	thirdPersonCamera->SetActive(false);
 
+	//set the rotation rate for the character controller
 	GetCharacterMovement()->RotationRate = FRotator(0, 540, 0);
 	turnRate = 45;
 
@@ -78,6 +83,7 @@ void ADualViewCharacterController::SetupPlayerInputComponent(UInputComponent* Pl
 
 void ADualViewCharacterController::LookUp(float axisValue)
 {
+	//change how the controller works based on the current camera mode
 	switch (currentCameraMode)
 	{
 	case FirstPerson:
@@ -133,11 +139,12 @@ void ADualViewCharacterController::WalkForward(float axisValue)
 	{
 		if (Controller != NULL && axisValue != 0)
 		{
-			const FRotator rotation = Controller->GetControlRotation();
-			const FRotator yaw(0, rotation.Yaw, 0);
-			const FVector direction = FRotationMatrix(yaw).GetUnitAxis(EAxis::X);
 
-			AddMovementInput(direction, axisValue);
+			const FRotator rotation = Controller->GetControlRotation(); //get the character's rotation
+			const FRotator yaw(0, rotation.Yaw, 0); //create a FRotator that only has the yaw value of the controller
+			const FVector direction = FRotationMatrix(yaw).GetUnitAxis(EAxis::X); //gets the direction on the x axis(forward)
+
+			AddMovementInput(direction, axisValue); //adds movement in the forward direction
 		}
 
 		break;
@@ -208,20 +215,26 @@ void ADualViewCharacterController::ChangeCamera()
 {
 	if(currentCameraMode == FirstPerson)
 	{
+		//sets the current camera to be inactive and changes to the other camera
 		firstPersonCamera->SetActive(false);
 		thirdPersonCamera->SetActive(true);
-		bUseControllerRotationPitch = false;
-		bUseControllerRotationRoll = false;
+		//doesnt let the player mesh rotate when the camera is moved
 		bUseControllerRotationYaw = false;
+		//when the character moves, the mesh will rotate in the direction the player is moving
 		GetCharacterMovement()->bOrientRotationToMovement = true;
+		//sets the camera mode to be third person
 		currentCameraMode = ThirdPerson;
 	}
 	else if(currentCameraMode == ThirdPerson)
 	{
+		//sets the current camera to be inactive and changes to the other camera
 		thirdPersonCamera->SetActive(false);
 		firstPersonCamera->SetActive(true);
+		//lets the player mesh be rotated when the camera is moved
 		bUseControllerRotationYaw = true;
+		//since the mesh is rotated when the camera is moved, doesnt need to be rotated when the character itself is moved
 		GetCharacterMovement()->bOrientRotationToMovement = false;
+		//sets the camera mode to be first person
 		currentCameraMode = FirstPerson;
 	}
 }
