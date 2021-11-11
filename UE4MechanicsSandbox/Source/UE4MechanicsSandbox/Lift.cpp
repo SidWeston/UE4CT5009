@@ -20,6 +20,8 @@ ALift::ALift()
 	liftTrigger->OnComponentBeginOverlap.AddDynamic(this, &ALift::OnBeginOverlap);
 	liftTrigger->OnComponentEndOverlap.AddDynamic(this, &ALift::OnEndOverlap);
 
+	liftTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("Lift Timeline"));
+
 }
 
 // Called when the game starts or when spawned

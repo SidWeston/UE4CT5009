@@ -25,19 +25,15 @@ ADoor::ADoor()
 
 	doorTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("Door Timeline"));
 
+	positiveRotation = FRotator(0, -90, 0);
+	negativeRotation = FRotator(0, 90, 0);
+
 }
 
 // Called when the game starts or when spawned
 void ADoor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	closedRotation = GetActorRotation(); //sets the closed rotation to the current rotation of the door when the game starts, assumes that the door starts closed
-
-	openRotation = GetActorRotation(); //sets the open rotation to be 90 degrees further on the z axis
-	openRotation.Yaw -= 90;
-
-	targetRotation = closedRotation; //sets the target rotation to initially be the closed rotation
 
 	UpdateTimelineFloat.BindDynamic(this, &ADoor::UpdateTimelineComp);
 
@@ -59,7 +55,15 @@ void ADoor::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* Other
 	const ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	if (playerCharacter->GetUniqueID() == OtherActor->GetUniqueID())
 	{
-		targetRotation = openRotation;
+		float isFacing = FVector::DotProduct(playerCharacter->GetActorForwardVector(), this->GetActorForwardVector());
+		if(isFacing >= 0)
+		{
+			targetRotation = negativeRotation;
+		}
+		else if(isFacing < 0)
+		{
+			targetRotation = positiveRotation;
+		}
 		doorTimeline->Play();
 	}
 }
@@ -75,7 +79,7 @@ void ADoor::OnBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 
 void ADoor::UpdateTimelineComp(float output)
 {
-	doorMesh->SetRelativeRotation(FMath::Lerp(closedRotation, targetRotation, output));
+	doorMesh->SetRelativeRotation(FMath::Lerp(this->GetActorRotation(), targetRotation, output));
 }
 
 

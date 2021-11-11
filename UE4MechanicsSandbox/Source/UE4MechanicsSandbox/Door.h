@@ -18,8 +18,6 @@ public:
 	// Sets default values for this actor's properties
 	ADoor();
 
-	
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -27,11 +25,11 @@ protected:
 	UPROPERTY(EditAnywhere)
 	FRotator targetRotation;
 
-	UPROPERTY(EditAnywhere)
-	FRotator openRotation;
+	UPROPERTY(VisibleAnywhere)
+	FRotator positiveRotation;
 
-	UPROPERTY(EditAnywhere)
-	FRotator closedRotation;
+	UPROPERTY(VisibleAnywhere)
+	FRotator negativeRotation;
 
 	UPROPERTY(VisibleAnywhere)
 	UTimelineComponent* doorTimeline;
