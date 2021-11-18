@@ -22,6 +22,8 @@ ALift::ALift()
 
 	liftTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("Lift Timeline"));
 
+	objectInteractionComponent->OnInteract.BindUFunction(this, "InteractWithLift");
+
 }
 
 // Called when the game starts or when spawned
@@ -70,4 +72,5 @@ void ALift::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor
 		liftTimeline->Reverse();
 	}
 }
+
 

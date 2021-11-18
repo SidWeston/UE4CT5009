@@ -2,7 +2,7 @@
 
 
 #include "DualViewCharacterController.h"
-
+#include "InteractionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -79,6 +79,8 @@ void ADualViewCharacterController::SetupPlayerInputComponent(UInputComponent* Pl
 	PlayerInputComponent->BindAction(TEXT("AbilityTwo"), IE_Pressed, this, &ADualViewCharacterController::UseAbilityTwo);
 	//Change the player camera
 	PlayerInputComponent->BindAction(TEXT("CameraChange"), IE_Pressed, this, &ADualViewCharacterController::ChangeCamera);
+	//interact function fires raycast
+	PlayerInputComponent->BindAction(TEXT("Interact"), IE_Pressed, this, &ADualViewCharacterController::DoLineTrace);
 }
 
 void ADualViewCharacterController::LookUp(float axisValue)
@@ -239,3 +241,28 @@ void ADualViewCharacterController::ChangeCamera()
 	}
 }
 
+void ADualViewCharacterController::DoLineTrace()
+{
+	FHitResult outHit;
+	//Create start location for the raycast
+	FVector startLocation = firstPersonCamera->GetComponentLocation();
+	//Create end location
+	FVector endLocation = ((firstPersonCamera->GetForwardVector() * 1000.0f) + startLocation);
+	//Create collision parameters
+	FCollisionQueryParams collisionParams;
+
+	//draw the line in the game for debug purposes
+	DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Red, false, 1, 0, 1);
+
+	//Start the line trace
+	if(GetWorld()->LineTraceSingleByChannel(outHit, startLocation, endLocation, ECC_Visibility, collisionParams))
+	{
+		if(outHit.GetActor()->ActorHasTag("Interactable"))
+		{
+			if(outHit.GetActor()->FindComponentByClass<UInteractionComponent>())
+			{
+				outHit.GetActor()->FindComponentByClass<UInteractionComponent>()->ActivationFunction(); 
+			}
+		}
+	}
+}

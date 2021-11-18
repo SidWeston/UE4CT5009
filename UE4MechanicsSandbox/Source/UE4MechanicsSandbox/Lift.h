@@ -7,6 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/TimelineComponent.h"
+#include "InteractionComponent.h"
 #include "Lift.generated.h"
 
 UCLASS()
@@ -45,6 +46,10 @@ public:
 
 	FOnTimelineFloat UpdateTimelineFloat;
 
+	UInteractionComponent* objectInteractionComponent;
+
+	void InteractWithLift();
+
 	UFUNCTION()
 	void UpdateTimelineComp(float output);
 
@@ -52,7 +57,5 @@ public:
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-
 
 };

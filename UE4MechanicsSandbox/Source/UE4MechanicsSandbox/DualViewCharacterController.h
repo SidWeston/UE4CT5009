@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "DrawDebugHelpers.h"
 #include "DualViewCharacterController.generated.h"
 
 UCLASS()
@@ -17,7 +18,7 @@ public:
 	enum CameraMode
 	{
 		FirstPerson,
-		ThirdPerson
+		ThirdPerson,
 	};
 
 	// Sets default values for this character's properties
@@ -68,5 +69,7 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void DoLineTrace();
 
 };
