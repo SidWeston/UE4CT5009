@@ -6,7 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "InteractionComponent.generated.h"
 
-DECLARE_DELEGATE(FOnInteractDelegate);
+DECLARE_DYNAMIC_DELEGATE(FOnInteractDelegate);
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UE4MECHANICSSANDBOX_API UInteractionComponent : public UActorComponent
@@ -27,6 +28,7 @@ public:
 
 	virtual void ActivationFunction();
 
+	UPROPERTY()
 	FOnInteractDelegate OnInteract;
 		
 };

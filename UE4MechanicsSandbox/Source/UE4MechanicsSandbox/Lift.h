@@ -48,6 +48,7 @@ public:
 
 	UInteractionComponent* objectInteractionComponent;
 
+	UFUNCTION()
 	void InteractWithLift();
 
 	UFUNCTION()

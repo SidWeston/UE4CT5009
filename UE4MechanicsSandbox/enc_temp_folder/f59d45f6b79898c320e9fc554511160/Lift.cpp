@@ -23,6 +23,7 @@ ALift::ALift()
 	liftTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("Lift Timeline"));
 	
 	objectInteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("Interaction Component"));
+
 	objectInteractionComponent->OnInteract.BindUFunction(this, GET_FUNCTION_NAME_CHECKED(ALift, InteractWithLift)); 
 
 }
