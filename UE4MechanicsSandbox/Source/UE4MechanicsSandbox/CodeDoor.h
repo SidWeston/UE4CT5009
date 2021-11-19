@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/WidgetComponent.h"
-#include "Components/TimelineComponent.h"
+#include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "CodeDoor.generated.h"
 
@@ -23,45 +23,54 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	//materials showing whether the door is locked or unlocked
+	UPROPERTY(EditAnywhere)
+	UMaterial* lockedMaterial;
+	UPROPERTY(EditAnywhere)
+	UMaterial* unlockedMaterial;
 
+	//static mesh components
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* doorFrame;
-
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* doorMesh;
-
-	UPROPERTY(EditAnywhere)
-	FVector openLocation;
-
-	FVector closedLocation;
-
 	UPROPERTY(VisibleAnywhere)
-	UTimelineComponent* doorTimeline;
+	UStaticMeshComponent* keypadBack;
+
+	//vectors for the closed and open positions of the door mesh
+	//open location should be editable within the editor to make it easier to configure
+	UPROPERTY(EditAnywhere) 
+	FVector openLocation; 
+	FVector closedLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FString doorCode; //the code that is required to be entered for the door to open
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	bool shouldOpen;
-	
+	bool playerInRange; //is the player in range of the door for it to open
+
+	UPROPERTY()
+	bool doorUnlocked; //is the door unlocked from the keypad
+
+	//box trigger
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* doorTrigger; 
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite) //allows the widget component to be referenced as a variable within the blueprint editor
 	UWidgetComponent* keyPadWidget;
 
-	UPROPERTY(EditAnywhere)
-	UCurveFloat* doorCurve;
+	UFUNCTION(BlueprintCallable) //allows the function to be called within the blueprint editor
+	void CheckCode(FString CodeEntered);
 
-	FOnTimelineFloat UpdateTimelineFloat;
-
+	//overlap functions for the box trigger
 	UFUNCTION()
-	void UpdateTimelineComp(float output);
-
-	UFUNCTION(BlueprintCallable)
-	void CheckCode(FString CodeEntered, UUserWidget* UIKeyPad);
-
+	void OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 
 };
