@@ -34,7 +34,7 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 void UInteractionComponent::ActivationFunction()
 {
-	OnInteract.ExecuteIfBound();
+	FInteract.ExecuteIfBound();
 }
 
 

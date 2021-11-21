@@ -257,7 +257,7 @@ void ADualViewCharacterController::DoLineTrace()
 	//Start the line trace
 	if(GetWorld()->LineTraceSingleByChannel(outHit, startLocation, endLocation, ECC_Visibility, collisionParams))
 	{
-		if(outHit.GetActor()->ActorHasTag("Interactable"))
+		if(outHit.GetActor()->ActorHasTag("Interactable") || outHit.GetComponent()->ComponentHasTag("Interactable"))
 		{
 			if(outHit.GetActor()->FindComponentByClass<UInteractionComponent>())
 			{

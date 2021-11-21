@@ -46,11 +46,6 @@ public:
 
 	FOnTimelineFloat UpdateTimelineFloat;
 
-	UInteractionComponent* objectInteractionComponent;
-
-	UFUNCTION()
-	void InteractWithLift();
-
 	UFUNCTION()
 	void UpdateTimelineComp(float output);
 

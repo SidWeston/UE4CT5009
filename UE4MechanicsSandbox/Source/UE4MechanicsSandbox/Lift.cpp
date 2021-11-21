@@ -21,9 +21,6 @@ ALift::ALift()
 	liftTrigger->OnComponentEndOverlap.AddDynamic(this, &ALift::OnEndOverlap);
 
 	liftTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("Lift Timeline"));
-	
-	objectInteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("Interaction Component"));
-	objectInteractionComponent->OnInteract.BindUFunction(this, GET_FUNCTION_NAME_CHECKED(ALift, InteractWithLift)); 
 
 }
 
@@ -54,11 +51,6 @@ void ALift::Tick(float DeltaTime)
 void ALift::UpdateTimelineComp(float output)
 {
 	liftMesh->SetRelativeLocation(FMath::Lerp(liftStartPos, liftEndPos, output));
-}
-
-void ALift::InteractWithLift()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Interacted"));
 }
 
 void ALift::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

@@ -4,18 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "InteractionComponent.generated.h"
+#include "InteractionComponent.h"
+#include "InteractButtonComp.generated.h"
 
-DECLARE_DELEGATE(FInteractionDelegate);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class UE4MECHANICSSANDBOX_API UInteractionComponent : public UActorComponent
+class UE4MECHANICSSANDBOX_API UInteractButtonComp : public UActorComponent
 {
 	GENERATED_BODY()
 
+
 public:	
 	// Sets default values for this component's properties
-	UInteractionComponent();
+	UInteractButtonComp();
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* buttonObject;
+
+	UPROPERTY(VisibleAnywhere)
+	bool buttonPressed;
+
+	UPROPERTY(VisibleAnywhere)
+	UInteractionComponent* interactionComponent;
 
 protected:
 	// Called when the game starts
@@ -25,7 +35,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual void ActivationFunction();
-
-	FInteractionDelegate FInteract;
+	UFUNCTION()
+	void OnButtonPressed();
+		
 };

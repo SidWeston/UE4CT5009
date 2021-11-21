@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/WidgetComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/TimelineComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "CodeDoor.generated.h"
 
@@ -56,9 +57,21 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	UBoxComponent* doorTrigger; 
 
+	//timeline component
+	UPROPERTY(VisibleAnywhere)
+	UTimelineComponent* doorTimeline;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* doorCurve;
+
+	FOnTimelineFloat updateTimelineFloat;
+
+	UFUNCTION()
+	void UpdateTimelineComp(float output);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite) //allows the widget component to be referenced as a variable within the blueprint editor
 	UWidgetComponent* keyPadWidget;

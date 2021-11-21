@@ -33,6 +33,8 @@ ACodeDoor::ACodeDoor()
 	doorTrigger->OnComponentBeginOverlap.AddDynamic(this, &ACodeDoor::OnBoxBeginOverlap);
 	doorTrigger->OnComponentEndOverlap.AddDynamic(this, &ACodeDoor::OnBoxEndOverlap);
 
+	doorTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("Door Timeline"));
+
 	doorUnlocked = false;
 }
 
@@ -44,28 +46,37 @@ void ACodeDoor::BeginPlay()
 	closedLocation = doorMesh->GetRelativeLocation();
 	//set the keypad material to be locked initially
 	keypadBack->SetMaterial(0, lockedMaterial);
+
+	//bind timeline to function
+	updateTimelineFloat.BindDynamic(this, &ACodeDoor::UpdateTimelineComp);
+
+	if(doorCurve)
+	{
+		//add the float track to the timeline
+		doorTimeline->AddInterpFloat(doorCurve, updateTimelineFloat);
+	}
 }
 
 // Called every frame
 void ACodeDoor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 	if (playerInRange && doorUnlocked) //if the player is within the proximity of the door and the door is unlocked
 	{
-		if (doorMesh->GetRelativeLocation() != openLocation) //if the location of the door is not already in the open position
-		{
-			doorMesh->SetRelativeLocation(FMath::Lerp(doorMesh->GetRelativeLocation(), openLocation, 0.01f)); //set the location of the door
-		}
+		doorTimeline->Play();
 	}
-	else if(!playerInRange || !doorUnlocked) //if either condition is false, it will close the door
+	else if (!playerInRange || !doorUnlocked) //if either condition is false, it will close the door
 	{
-		if(doorMesh->GetRelativeLocation() != closedLocation) //door will not attempt to close if it is already closed
-		{
-			doorMesh->SetRelativeLocation(FMath::Lerp(doorMesh->GetRelativeLocation(), closedLocation, 0.01f)); //set the location of the door
-		}
+		doorTimeline->Reverse();
 	}
+
 }
+
+void ACodeDoor::UpdateTimelineComp(float output)
+{
+	doorMesh->SetRelativeLocation(FMath::Lerp(closedLocation, openLocation, output));
+}
+
 
 void ACodeDoor::CheckCode(FString CodeEntered)
 {
