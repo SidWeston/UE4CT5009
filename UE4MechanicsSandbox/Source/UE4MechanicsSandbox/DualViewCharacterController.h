@@ -7,6 +7,9 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Components/WidgetInteractionComponent.h"
+#include "CableComponent.h"
+#include "RopeAttachPoint.h"
 #include "DualViewCharacterController.generated.h"
 
 UCLASS()
@@ -60,8 +63,28 @@ protected:
 
 	float turnRate;
 
+	UPROPERTY(EditAnywhere)
+	float jumpHeight;
+	UPROPERTY(EditAnywhere)
+	float dashLength;
+
+	bool hasJumped, hasDashed;
+
 	float walkSpeed;
 	float sprintSpeed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UWidgetInteractionComponent* widgetInteraction;
+
+	//grapple hook
+	UPROPERTY(VisibleAnywhere)
+	UCableComponent* grappleHook;
+	bool hookAttached;
+	FVector swingPoint;
+	UPROPERTY(EditAnywhere)
+	float maxSwingSpeed;
+	UPROPERTY(VisibleAnywhere)
+	ARopeAttachPoint* ropeAttachPoint; //empty actor used to attach the end of the grapple hook to where the raycast lands
 
 public:	
 	// Called every frame
@@ -71,5 +94,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void DoLineTrace();
+	void FireGrappleHook();
+	void ReleaseGrappleHook();
 
 };

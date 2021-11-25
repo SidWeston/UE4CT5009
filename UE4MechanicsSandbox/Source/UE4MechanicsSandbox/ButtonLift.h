@@ -5,28 +5,30 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "Components/TimelineComponent.h"
-#include "Lift.generated.h"
+#include "InteractButtonComp.h"
+#include "Kismet/GameplayStatics.h"
+#include "ButtonLift.generated.h"
+
 
 UCLASS()
-class UE4MECHANICSSANDBOX_API ALift : public AActor
+class UE4MECHANICSSANDBOX_API AButtonLift : public AActor
 {
 	GENERATED_BODY()
-	
+
 public:	
 	// Sets default values for this actor's properties
-	ALift();
+	AButtonLift();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* liftMesh;
+	UStaticMeshComponent* liftBase;
 
 	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* liftBack;
+	UStaticMeshComponent* liftMesh;
 
 	UPROPERTY(VisibleAnywhere)
 	UBoxComponent* liftTrigger;
@@ -40,6 +42,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, meta = (MakeEditWidget = true))
 	FVector liftEndPos;
 
+	UPROPERTY(VisibleAnywhere)
+	UInteractButtonComp* liftButton;
+
+	bool playerOnLift;
+	bool isLiftUp;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -49,8 +57,13 @@ public:
 
 	FOnTimelineFloat UpdateTimelineFloat;
 
+	FOnTimelineEvent TimelineFinishedEvent;
+
 	UFUNCTION()
 	void UpdateTimelineComp(float output);
+
+	UFUNCTION()
+	void TimelineFinished();
 
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

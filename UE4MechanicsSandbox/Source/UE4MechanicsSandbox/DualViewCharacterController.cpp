@@ -38,19 +38,48 @@ ADualViewCharacterController::ADualViewCharacterController()
 	sprintSpeed = 1000;
 	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 
+	widgetInteraction = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("Widget Interaction"));
+	widgetInteraction->AttachToComponent(firstPersonCamera, FAttachmentTransformRules::KeepRelativeTransform);
+
+	grappleHook = CreateDefaultSubobject<UCableComponent>(TEXT("Grapple Hook"));
+	grappleHook->AttachToComponent(firstPersonCamera, FAttachmentTransformRules::KeepWorldTransform);
+	grappleHook->SetHiddenInGame(true);
 }
 
 // Called when the game starts or when spawned
 void ADualViewCharacterController::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
 void ADualViewCharacterController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	//if the grapple hook is attached to an object
+	if(hookAttached)
+	{
+		FVector grappleHookStart = GetActorLocation() -= swingPoint; //get the start location of the grapple hook
+		const float playerVelocity = FVector::DotProduct(this->GetVelocity(), grappleHookStart); //calculate the player velocity 
+		grappleHookStart.Normalize(); //normalize the grapple hook start vector
+		grappleHookStart *= playerVelocity;
+		FVector forceToAdd; 
+		forceToAdd = grappleHookStart *= -10.0f;
+		if(playerVelocity < maxSwingSpeed) //if the player velocity is higher than the maximum allowed swing speed,
+		{
+			forceToAdd /= 1.5f; //lower the force added to the player
+		}
+		this->GetCharacterMovement()->AddForce(forceToAdd); //add force to the player to make them swing
+	}
+
+	//when the player is on the floor, reset the jumps and dashes
+	if(this->GetCharacterMovement()->IsMovingOnGround())
+	{
+		hasJumped = false;
+		hasDashed = false;
+	}
 
 }
 
@@ -81,6 +110,9 @@ void ADualViewCharacterController::SetupPlayerInputComponent(UInputComponent* Pl
 	PlayerInputComponent->BindAction(TEXT("CameraChange"), IE_Pressed, this, &ADualViewCharacterController::ChangeCamera);
 	//interact function fires raycast
 	PlayerInputComponent->BindAction(TEXT("Interact"), IE_Pressed, this, &ADualViewCharacterController::DoLineTrace);
+	//fire function fires longer raycast for use with grapple hook
+	PlayerInputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &ADualViewCharacterController::FireGrappleHook);
+	PlayerInputComponent->BindAction(TEXT("Fire"), IE_Released, this, &ADualViewCharacterController::ReleaseGrappleHook);
 }
 
 void ADualViewCharacterController::LookUp(float axisValue)
@@ -187,7 +219,11 @@ void ADualViewCharacterController::WalkRight(float axisValue)
 }
 void ADualViewCharacterController::PlayerJump()
 {
-	this->Jump();
+	if(!hasJumped)
+	{
+		this->LaunchCharacter(this->GetActorUpVector() * jumpHeight, false, true);
+		hasJumped = true;
+	}
 }
 void ADualViewCharacterController::SprintStart()
 {
@@ -197,15 +233,14 @@ void ADualViewCharacterController::SprintEnd()
 {
 	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 }
-void ADualViewCharacterController::UseAbilityOne()
+void ADualViewCharacterController::UseAbilityOne() //dash forward
 {
-	if(JumpMaxCount == 1)
+	if(!hasDashed)
 	{
-		JumpMaxCount = 2;
-	}
-	else
-	{
-		JumpMaxCount = 1;
+		//create a vector to launch the character with
+		const FVector dashVector = this->GetActorForwardVector() * dashLength;
+		this->LaunchCharacter(dashVector, false, false); //launch the character forward using the vector
+		hasDashed = true; //the player cannot dash again until this is reset
 	}
 }
 void ADualViewCharacterController::UseAbilityTwo()
@@ -243,6 +278,35 @@ void ADualViewCharacterController::ChangeCamera()
 
 void ADualViewCharacterController::DoLineTrace()
 {
+
+	FHitResult outHit;
+	//Create start location for the raycast
+	const FVector startLocation = firstPersonCamera->GetComponentLocation();
+	//Create end location
+	const FVector endLocation = ((firstPersonCamera->GetForwardVector() * 200.0f) + startLocation);
+	//Create collision parameters
+	const FCollisionQueryParams collisionParams;
+
+	//draw the line in the game for debug purposes
+	DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Red, false, 1, 0, 1);
+
+	//Start the line trace
+	if(GetWorld()->LineTraceSingleByChannel(outHit, startLocation, endLocation, ECC_Visibility, collisionParams))
+	{
+		if(outHit.GetActor()->ActorHasTag("Interactable") || outHit.GetComponent()->ComponentHasTag("Interactable")) //checks if the actor/component that is hit is tagged as interactable
+		{
+			if(outHit.GetActor()->FindComponentByClass<UInteractionComponent>()) //checks if the object has the interaction component to avoid crashes
+			{
+				outHit.GetActor()->FindComponentByClass<UInteractionComponent>()->ActivationFunction(); //calls the activation function on the object which uses delegates
+			}
+		}
+	}
+}
+
+//this function fires a linetrace, similar to the interact function but this has different logic when it hits the relevant item,
+//and the linetrace itself if longer, so a different function makes it easier
+void ADualViewCharacterController::FireGrappleHook()
+{
 	FHitResult outHit;
 	//Create start location for the raycast
 	FVector startLocation = firstPersonCamera->GetComponentLocation();
@@ -254,15 +318,34 @@ void ADualViewCharacterController::DoLineTrace()
 	//draw the line in the game for debug purposes
 	DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Red, false, 1, 0, 1);
 
-	//Start the line trace
-	if(GetWorld()->LineTraceSingleByChannel(outHit, startLocation, endLocation, ECC_Visibility, collisionParams))
+	if (GetWorld()->LineTraceSingleByChannel(outHit, startLocation, endLocation, ECC_Visibility, collisionParams))
 	{
-		if(outHit.GetActor()->ActorHasTag("Interactable") || outHit.GetComponent()->ComponentHasTag("Interactable"))
+		if (outHit.GetActor()->ActorHasTag("Swingable") || outHit.GetComponent()->ComponentHasTag("Swingable")) //checks if the actor/component that is hit is tagged as swingable
 		{
-			if(outHit.GetActor()->FindComponentByClass<UInteractionComponent>())
-			{
-				outHit.GetActor()->FindComponentByClass<UInteractionComponent>()->ActivationFunction(); 
-			}
+			swingPoint = outHit.ImpactPoint; //sets swing point to the world location of where the linetrace hit
+			grappleHook->SetHiddenInGame(false); //unhides the grapple hook
+			hookAttached = true; //tells the tick function that the hook is attached
+			//Spawn actor for the grapple hook location
+			const FVector location = outHit.ImpactPoint; 
+			const FRotator rotation(0, 0, 0);
+			const FActorSpawnParameters spawnParam;
+			ropeAttachPoint = GetWorld()->SpawnActor<ARopeAttachPoint>(location, rotation, spawnParam); //spawns an actor, which the grapple hook cable component will be attached to
+			grappleHook->SetAttachEndTo(ropeAttachPoint, "None", "None"); //attach the end of the grapple hook
 		}
+	}
+}
+
+void ADualViewCharacterController::ReleaseGrappleHook()
+{
+	if(hookAttached == true) //will only proceed if the hook was actually attached to something previously
+	{
+		hookAttached = false; //hook is no longer attached
+		grappleHook->SetHiddenInGame(true); //hide the hook
+		ropeAttachPoint = nullptr; //remove the rope attach point
+		if(!this->GetCharacterMovement()->IsMovingOnGround()) //if the character is not on the ground
+		{
+			this->Jump(); //gives the player a small boost when they release from the grapple hook
+		}
+
 	}
 }
