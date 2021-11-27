@@ -6,8 +6,11 @@
 #include "GameFramework/Actor.h"
 #include "CableComponent.h"
 #include "InteractionComponent.h"
-#include "RopeAttachPoint.h"
+#include "Components/TimelineComponent.h"
 #include "Zipline.generated.h"
+
+//forward declare
+class ADualViewCharacterController;
 
 UCLASS()
 class UE4MECHANICSSANDBOX_API AZipline : public AActor
@@ -22,6 +25,9 @@ public:
 	UCableComponent* ziplineCable;
 
 	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* ziplineAnchorPoint;
+
+	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* ziplineStart;
 
 	UPROPERTY(VisibleAnywhere)
@@ -31,19 +37,31 @@ public:
 	UInteractionComponent* ziplineInteraction;
 
 	UPROPERTY(VisibleAnywhere)
-	ARopeAttachPoint* ropeAttachPoint;
+	UTimelineComponent* ziplineTimeline;
 
 	UPROPERTY(EditAnywhere)
 	float travelTime;
 
-	UPROPERTY(VisibleAnywhere, meta = (MakeEditWidget))
-	FVector ziplinePointOne;
-	UPROPERTY(VisibleAnywhere, meta = (MakeEditWidget))
-	FVector ziplinePointTwo;
+	UPROPERTY(EditAnywhere, meta = (MakeEditWidget))
+	FVector startPosition;
+	UPROPERTY(EditAnywhere, meta = (MakeEditWidget))
+	FVector endPosition;
+
+	//ACharacter* playerCharacter;
+	ADualViewCharacterController* playerCharacter;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* ziplineCurve;
+
+	FOnTimelineFloat updateTimelineFloat;
+
+	UFUNCTION()
+	void UpdateTimelineComp(float output);
+
 
 public:	
 	// Called every frame
@@ -51,6 +69,5 @@ public:
 
 	UFUNCTION()
 	void OnInteract();
-
 
 };

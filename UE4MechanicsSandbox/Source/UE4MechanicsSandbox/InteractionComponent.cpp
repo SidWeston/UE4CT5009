@@ -32,9 +32,17 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	// ...
 }
 
-void UInteractionComponent::ActivationFunction()
+void UInteractionComponent::ActivationFunction(AActor* actorInteractedWith)
 {
+	interactedActor = actorInteractedWith;
 	FInteract.ExecuteIfBound();
 }
+
+void UInteractionComponent::ActivationFunction(UActorComponent* componentInteractedWith)
+{
+	interactedComponent = componentInteractedWith;
+	FInteract.ExecuteIfBound();
+}
+
 
 

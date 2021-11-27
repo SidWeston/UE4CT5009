@@ -238,7 +238,16 @@ void ADualViewCharacterController::UseAbilityOne() //dash forward
 	if(!hasDashed)
 	{
 		//create a vector to launch the character with
-		const FVector dashVector = this->GetActorForwardVector() * dashLength;
+		FVector dashVector;
+		if(this->GetCharacterMovement()->IsMovingOnGround())
+		{
+			//if the player is on the ground add a slight upwards direction to the vector to stop the player dragging on the ground
+			dashVector = this->GetActorForwardVector() * dashLength + this->GetActorUpVector() * 200;
+		}
+		else
+		{
+			dashVector = this->GetActorForwardVector() * dashLength;
+		}
 		this->LaunchCharacter(dashVector, false, false); //launch the character forward using the vector
 		hasDashed = true; //the player cannot dash again until this is reset
 	}
@@ -297,7 +306,15 @@ void ADualViewCharacterController::DoLineTrace()
 		{
 			if(outHit.GetActor()->FindComponentByClass<UInteractionComponent>()) //checks if the object has the interaction component to avoid crashes
 			{
-				outHit.GetActor()->FindComponentByClass<UInteractionComponent>()->ActivationFunction(); //calls the activation function on the object which uses delegates
+				if(outHit.GetActor()->ActorHasTag("Interactable")) //if the raycast hit a whole actor
+				{
+					outHit.GetActor()->FindComponentByClass<UInteractionComponent>()->ActivationFunction(outHit.GetActor()); //calls the activation function on the object which uses delegates	
+				}
+				else if(outHit.GetComponent()->ComponentHasTag("Interactable")) //if the raycast hit a specific component
+				{
+					outHit.GetActor()->FindComponentByClass<UInteractionComponent>()->ActivationFunction(outHit.GetComponent()); //calls the activation function on the object which uses delegates
+				}
+				
 			}
 		}
 	}

@@ -25,7 +25,13 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual void ActivationFunction();
+	virtual void ActivationFunction(AActor* actorInteractedWith);
+
+	virtual void ActivationFunction(UActorComponent* componentInteractedWith);
+
+	AActor* interactedActor;
+
+	UActorComponent* interactedComponent;
 
 	FInteractionDelegate FInteract;
 };

@@ -27,6 +27,8 @@ public:
 	// Sets default values for this character's properties
 	ADualViewCharacterController();
 
+	bool hasJumped, hasDashed;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -68,10 +70,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float dashLength;
 
-	bool hasJumped, hasDashed;
-
-	float walkSpeed;
-	float sprintSpeed;
+	float walkSpeed, sprintSpeed;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UWidgetInteractionComponent* widgetInteraction;

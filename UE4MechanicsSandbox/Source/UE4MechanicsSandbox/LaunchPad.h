@@ -4,7 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/BoxComponent.h"
 #include "LaunchPad.generated.h"
+
+//forward declare
+class ADualViewCharacterController;
 
 UCLASS()
 class UE4MECHANICSSANDBOX_API ALaunchPad : public AActor
@@ -18,8 +22,13 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* launchPadBody;
 
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* launchPadTrigger;
+
 	UPROPERTY(EditAnywhere)
 	float launchVelocity;
+
+	ADualViewCharacterController* playerCharacter;
 
 protected:
 	// Called when the game starts or when spawned
@@ -28,5 +37,11 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	void OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 
 };
