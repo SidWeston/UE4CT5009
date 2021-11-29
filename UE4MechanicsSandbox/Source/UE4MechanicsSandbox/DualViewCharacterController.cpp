@@ -58,8 +58,8 @@ void ADualViewCharacterController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//if the grapple hook is attached to an object
-	if(hookAttached)
+	//if the grapple hook is attached to an object and the player is in the air
+	if(hookAttached && !this->GetCharacterMovement()->IsMovingOnGround())
 	{
 		FVector grappleHookStart = GetActorLocation() -= swingPoint; //get the start location of the grapple hook
 		const float playerVelocity = FVector::DotProduct(this->GetVelocity(), grappleHookStart); //calculate the player velocity 

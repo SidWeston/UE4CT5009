@@ -29,11 +29,15 @@ public:
 
 	bool hasJumped, hasDashed;
 
+	CameraMode currentCameraMode;
+	UPROPERTY(VisibleAnywhere);
+	UCameraComponent* firstPersonCamera;
+	UPROPERTY(VisibleAnywhere);
+	UCameraComponent* thirdPersonCamera;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	CameraMode currentCameraMode;
 
 	//Input functions
 	//Mouse/Camera input
@@ -53,12 +57,6 @@ protected:
 	void UseAbilityTwo();
 	//Change camera mode between first and third person
 	void ChangeCamera();
-
-	UPROPERTY(VisibleAnywhere);
-	UCameraComponent* firstPersonCamera;
-
-	UPROPERTY(VisibleAnywhere);
-	UCameraComponent* thirdPersonCamera;
 
 	UPROPERTY(VisibleAnywhere);
 	USpringArmComponent* boomArmTP;
