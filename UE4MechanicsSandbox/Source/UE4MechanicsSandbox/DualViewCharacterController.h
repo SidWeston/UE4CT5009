@@ -10,6 +10,7 @@
 #include "Components/WidgetInteractionComponent.h"
 #include "CableComponent.h"
 #include "RopeAttachPoint.h"
+#include "Components/CapsuleComponent.h"
 #include "DualViewCharacterController.generated.h"
 
 UCLASS()
@@ -34,6 +35,14 @@ public:
 	UCameraComponent* firstPersonCamera;
 	UPROPERTY(VisibleAnywhere);
 	UCameraComponent* thirdPersonCamera;
+
+	UPROPERTY(VisibleAnywhere)
+	UCapsuleComponent* wallRunCollision;
+
+	UFUNCTION()
+	void OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnCapsuleEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 protected:
 	// Called when the game starts or when spawned

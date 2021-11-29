@@ -44,6 +44,7 @@ ADualViewCharacterController::ADualViewCharacterController()
 	grappleHook = CreateDefaultSubobject<UCableComponent>(TEXT("Grapple Hook"));
 	grappleHook->AttachToComponent(firstPersonCamera, FAttachmentTransformRules::KeepWorldTransform);
 	grappleHook->SetHiddenInGame(true);
+
 }
 
 // Called when the game starts or when spawned
@@ -365,4 +366,18 @@ void ADualViewCharacterController::ReleaseGrappleHook()
 		}
 
 	}
+}
+
+void ADualViewCharacterController::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Overlap"));
+	if (OtherActor->ActorHasTag("WallRun") || OtherComp->ComponentHasTag("WallRun"))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Overlapped with wall"));
+	}
+}
+
+void ADualViewCharacterController::OnCapsuleEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+
 }
