@@ -161,11 +161,13 @@ void ADualViewCharacterController::LookUp(float axisValue)
 		case FirstPerson:
 		{
 			this->AddControllerPitchInput(axisValue);
+			physicsHandle->SetTargetLocation(firstPersonCamera->GetComponentLocation() + (firstPersonCamera->GetForwardVector() * 200));
 			break;
 		}
 		case ThirdPerson:
 		{
 			this->AddControllerPitchInput(axisValue * GetWorld()->GetDeltaSeconds() * turnRate);
+			physicsHandle->SetTargetLocation(thirdPersonCamera->GetComponentLocation() + (thirdPersonCamera->GetForwardVector() * 540));
 			break;
 		}
 		default:
@@ -181,7 +183,7 @@ void ADualViewCharacterController::LookUp(float axisValue)
 		itemToInspect->SetActorRotation(newItemRotationY);
 	}
 
-	physicsHandle->SetTargetLocation(firstPersonCamera->GetComponentLocation() + (firstPersonCamera->GetForwardVector() * 200));
+	
 
 }
 
@@ -194,11 +196,13 @@ void ADualViewCharacterController::LookRight(float axisValue)
 		case FirstPerson:
 		{
 			this->AddControllerYawInput(axisValue);
+			physicsHandle->SetTargetLocation(firstPersonCamera->GetComponentLocation() + (firstPersonCamera->GetForwardVector() * 200));
 			break;
 		}
 		case ThirdPerson:
 		{
 			this->AddControllerYawInput(axisValue * GetWorld()->GetDeltaSeconds() * turnRate);
+			physicsHandle->SetTargetLocation(thirdPersonCamera->GetComponentLocation() + (thirdPersonCamera->GetForwardVector() * 540));
 			break;
 		}
 		default:
@@ -214,7 +218,6 @@ void ADualViewCharacterController::LookRight(float axisValue)
 		itemToInspect->SetActorRotation(newItemRotationY);
 	}
 
-	physicsHandle->SetTargetLocation(firstPersonCamera->GetComponentLocation() + (firstPersonCamera->GetForwardVector() * 200));
 
 }
 
@@ -363,9 +366,25 @@ void ADualViewCharacterController::DoLineTrace()
 	{
 		FHitResult outHit;
 		//Create start location for the raycast
-		const FVector startLocation = firstPersonCamera->GetComponentLocation();
+		FVector startLocation;
+		FVector endLocation; 
+		switch(currentCameraMode)
+		{
+		case FirstPerson:
+			{
+				startLocation = firstPersonCamera->GetComponentLocation();
+				endLocation = ((firstPersonCamera->GetForwardVector() * 200.0f) + startLocation);
+				break;
+			}
+		case ThirdPerson:
+			{
+			startLocation = thirdPersonCamera->GetComponentLocation();
+			endLocation = ((thirdPersonCamera->GetForwardVector() * 540.0f) + startLocation); //third person camera needs extra linetrace distance as it is located further back on the player prefab
+			break;
+			}
+		}
 		//Create end location
-		const FVector endLocation = ((firstPersonCamera->GetForwardVector() * 200.0f) + startLocation);
+		
 		//Create collision parameters
 		const FCollisionQueryParams collisionParams;
 
@@ -423,10 +442,23 @@ void ADualViewCharacterController::ReleaseWidgetInteraction()
 void ADualViewCharacterController::FireGrappleHook()
 {
 	FHitResult outHit;
-	//Create start location for the raycast
-	FVector startLocation = firstPersonCamera->GetComponentLocation();
-	//Create end location
-	FVector endLocation = ((firstPersonCamera->GetForwardVector() * 1000.0f) + startLocation);
+	FVector startLocation;
+	FVector endLocation;
+	switch (currentCameraMode)
+	{
+	case FirstPerson:
+	{
+		startLocation = firstPersonCamera->GetComponentLocation();
+		endLocation = ((firstPersonCamera->GetForwardVector() * 1000.0f) + startLocation);
+		break;
+	}
+	case ThirdPerson:
+	{
+		startLocation = thirdPersonCamera->GetComponentLocation();
+		endLocation = ((thirdPersonCamera->GetForwardVector() * 1340.0f) + startLocation); //third person camera needs extra linetrace distance as it is located further back on the player prefab
+		break;
+	}
+	}
 	//Create collision parameters
 	FCollisionQueryParams collisionParams;
 
