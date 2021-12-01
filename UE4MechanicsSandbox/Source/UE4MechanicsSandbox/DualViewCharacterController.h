@@ -10,12 +10,8 @@
 #include "Components/WidgetInteractionComponent.h"
 #include "CableComponent.h"
 #include "RopeAttachPoint.h"
-#include "Components/SphereComponent.h"
-#include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "DualViewCharacterController.generated.h"
-
-//forward declare
-class AInspectableItem;
 
 UCLASS()
 class UE4MECHANICSSANDBOX_API ADualViewCharacterController : public ACharacter
@@ -23,7 +19,7 @@ class UE4MECHANICSSANDBOX_API ADualViewCharacterController : public ACharacter
 	GENERATED_BODY()
 
 public:
-	enum CameraMode //enum adds the possibility for more camera/movement modes to be added
+	enum CameraMode
 	{
 		FirstPerson,
 		ThirdPerson,
@@ -39,6 +35,14 @@ public:
 	UCameraComponent* firstPersonCamera;
 	UPROPERTY(VisibleAnywhere);
 	UCameraComponent* thirdPersonCamera;
+
+	UPROPERTY(VisibleAnywhere)
+	UCapsuleComponent* wallRunCollision;
+
+	UFUNCTION()
+	void OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnCapsuleEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 protected:
 	// Called when the game starts or when spawned
@@ -88,26 +92,6 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	ARopeAttachPoint* ropeAttachPoint; //empty actor used to attach the end of the grapple hook to where the raycast lands
 
-	bool isSprinting; //true if the player is currently sprinting
-	//values for stamina, max stamina and how fast it drains
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float stamina; 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float maxStamina;
-	UPROPERTY(EditAnywhere)
-	float staminaDrainRate; 
-
-	//item inspection
-	UPROPERTY(EditAnywhere)
-	USphereComponent* itemInspectLocation;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool isInspecting;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	AInspectableItem* itemToInspect;
-
-
-	//pick up/carry objects
-	UPhysicsHandleComponent* physicsHandle;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -116,7 +100,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void DoLineTrace();
-	void ReleaseWidgetInteraction();
 	void FireGrappleHook();
 	void ReleaseGrappleHook();
 

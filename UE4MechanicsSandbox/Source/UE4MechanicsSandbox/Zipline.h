@@ -39,14 +39,6 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UTimelineComponent* ziplineTimeline;
 
-	UPROPERTY(EditAnywhere)
-	float travelTime;
-
-	UPROPERTY(EditAnywhere, meta = (MakeEditWidget))
-	FVector startPosition;
-	UPROPERTY(EditAnywhere, meta = (MakeEditWidget))
-	FVector endPosition;
-
 	//ACharacter* playerCharacter;
 	ADualViewCharacterController* playerCharacter;
 

@@ -25,6 +25,7 @@ AZipline::AZipline()
 	ziplineCable->AttachToComponent(ziplineStart, FAttachmentTransformRules::KeepWorldTransform);
 
 	ziplineCable->SetAttachEndToComponent(ziplineEnd, "None");
+	ziplineCable->EndLocation.Z += 50;
 	ziplineCable->SetHiddenInGame(false);
 
 	ziplineInteraction = CreateDefaultSubobject<UInteractionComponent>(TEXT("Interaction Component"));
