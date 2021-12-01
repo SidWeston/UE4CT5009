@@ -10,7 +10,12 @@
 #include "Components/WidgetInteractionComponent.h"
 #include "CableComponent.h"
 #include "RopeAttachPoint.h"
+#include "Components/SphereComponent.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "DualViewCharacterController.generated.h"
+
+//forward declare
+class AInspectableItem;
 
 UCLASS()
 class UE4MECHANICSSANDBOX_API ADualViewCharacterController : public ACharacter
@@ -18,7 +23,7 @@ class UE4MECHANICSSANDBOX_API ADualViewCharacterController : public ACharacter
 	GENERATED_BODY()
 
 public:
-	enum CameraMode
+	enum CameraMode //enum adds the possibility for more camera/movement modes to be added
 	{
 		FirstPerson,
 		ThirdPerson,
@@ -83,6 +88,26 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	ARopeAttachPoint* ropeAttachPoint; //empty actor used to attach the end of the grapple hook to where the raycast lands
 
+	bool isSprinting; //true if the player is currently sprinting
+	//values for stamina, max stamina and how fast it drains
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float stamina; 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float maxStamina;
+	UPROPERTY(EditAnywhere)
+	float staminaDrainRate; 
+
+	//item inspection
+	UPROPERTY(EditAnywhere)
+	USphereComponent* itemInspectLocation;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool isInspecting;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	AInspectableItem* itemToInspect;
+
+
+	//pick up/carry objects
+	UPhysicsHandleComponent* physicsHandle;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -91,6 +116,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void DoLineTrace();
+	void ReleaseWidgetInteraction();
 	void FireGrappleHook();
 	void ReleaseGrappleHook();
 

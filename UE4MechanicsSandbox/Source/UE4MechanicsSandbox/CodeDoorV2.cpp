@@ -141,18 +141,12 @@ void ACodeDoorV2::OnBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* O
 void ACodeDoorV2::OnInteract()
 {
 	onKeypad = true;
-	playerCharacter->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(playerCharacter->GetActorLocation(), keyPadWidget->GetComponentLocation()));
 	APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (playerCharacter->currentCameraMode == ADualViewCharacterController::ThirdPerson)
+	if (playerCharacter->currentCameraMode == ADualViewCharacterController::FirstPerson)
 	{
-		playerCharacter->thirdPersonCamera->SetActive(false);
-	}
-	else if (playerCharacter->currentCameraMode == ADualViewCharacterController::FirstPerson)
-	{
-		playerController->SetViewTargetWithBlend(this, 2, VTBlend_Linear, 0, false);
+		playerController->SetViewTargetWithBlend(this, 1, VTBlend_Linear, 0, false);
 		playerController->bShowMouseCursor = true;
 		playerController->bEnableClickEvents = true;
-		playerController->bEnableMouseOverEvents = true;
 	}
 	keypadCamera->SetActive(true);
 }
