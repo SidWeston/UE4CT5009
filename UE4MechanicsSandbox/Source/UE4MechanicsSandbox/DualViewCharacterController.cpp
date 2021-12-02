@@ -54,7 +54,6 @@ ADualViewCharacterController::ADualViewCharacterController()
 
 
 	physicsHandle = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("Physics Handle"));
-
 }
 
 // Called when the game starts or when spawned
@@ -114,7 +113,6 @@ void ADualViewCharacterController::Tick(float DeltaTime)
 		}
 		
 	}
-
 
 }
 
@@ -182,9 +180,6 @@ void ADualViewCharacterController::LookUp(float axisValue)
 		newItemRotationY += itemToInspect->GetActorRotation();
 		itemToInspect->SetActorRotation(newItemRotationY);
 	}
-
-	
-
 }
 
 void ADualViewCharacterController::LookRight(float axisValue)
@@ -324,9 +319,8 @@ void ADualViewCharacterController::UseAbilityOne() //dash forward
 		hasDashed = true; //the player cannot dash again until this is reset
 	}
 }
-void ADualViewCharacterController::UseAbilityTwo()
+void ADualViewCharacterController::UseAbilityTwo() //rewind ability
 {
-	
 }
 
 void ADualViewCharacterController::ChangeCamera()

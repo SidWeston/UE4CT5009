@@ -105,7 +105,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	AInspectableItem* itemToInspect;
 
-
 	//pick up/carry objects
 	UPhysicsHandleComponent* physicsHandle;
 public:	
